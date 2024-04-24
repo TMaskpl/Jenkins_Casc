@@ -1,8 +1,8 @@
 version: '3.8'
 services:
   jenkins:
-    image: jenkins/jenkins:lts
-      # restart: unless-stopped
+    image: jenkins:jcasc
+    restart: unless-stopped
     privileged: true
     user: root
     ports:
