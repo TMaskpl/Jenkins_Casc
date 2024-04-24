@@ -1,0 +1,6 @@
+ansible
+paramiko
+pywinrm
+requests
+selenium
+urllib3
