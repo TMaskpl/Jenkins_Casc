@@ -1,0 +1,76 @@
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+       - id: ${JENKINS_ADMIN_ID}
+         password: ${JENKINS_ADMIN_PASSWORD}
+  authorizationStrategy:
+    globalMatrix:
+      permissions:
+        - "Overall/Administer:admin"
+        - "Overall/Read:authenticated"
+  remotingSecurity:
+    enabled: true
+security:
+  queueItemAuthenticator:
+    authenticators:
+    - global:
+        strategy: triggeringUsersAuthorizationStrategy
+unclassified:
+  location:
+    url: http://10.222.81.10:8080/
+  hashicorpVault:
+    configuration:
+      disableChildPoliciesOverride: false
+      engineVersion: 1
+      skipSslVerification: true
+      timeout: 60
+      vaultCredentialId: "vault-jenkins-role"
+      vaultUrl: "http://10.222.81.10:8200"
+credentials:                                                                                                                                                                                                   
+  system:
+    domainCredentials:
+    - credentials:
+      - vaultAppRoleCredential:
+         description: "vault-jenkins-role"
+         id: "vault-jenkins-role"
+         path: "approle"
+         roleId: "bf12fadd-7b26-5898-c2e6-74df0b09e6e4"
+         scope: GLOBAL
+         secretId: "{AQAAABAAAAAwc0KIHOkDBhLLu5Asz4647ZJchkBH+RSPT+BIO2r5i786pZz3+dyzIIy6e9ekj7PGx1hl+OA3vdGfkFwbUCj1aA==}"
+         usePolicies: false
+      - vaultUsernamePasswordCredentialImpl:
+         description: "vault-vagrant"
+         engineVersion: 1
+         id: "vault-vagrant"
+         passwordKey: "password"
+         path: "secrets/creds/vagrant"
+         scope: GLOBAL
+         usernameKey: "username"
+      - vaultStringCredentialImpl:
+         description: "vault-secret-text"
+         engineVersion: 1
+         id: "vault-secret-text"
+         path: "secrets/creds/my-secret-text"
+         scope: GLOBAL
+         vaultKey: "secret"
+jobs:
+  - script: >
+      folder('testjobs')
+  - script: >
+      pipelineJob('testjobs/default-agent') {
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url 'https://github.com/TMaskpl/Jenkins_pipeline.git'
+                }
+                branch('main')
+              }
+            }
+            scriptPath("Jenkinsfile_systeminfo")
+          }
+        }
+      }
